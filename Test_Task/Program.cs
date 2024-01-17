@@ -9,17 +9,21 @@ namespace Test_task
     {
         static void Main(string[] args)
         {
-            string filePath;
+            string folderPath;
             int syncInterval;
             string logPath;
+            long lastUpdate = DateTime.Now.Ticks;
 
             Console.WriteLine("Welcome to my Test task!");
             Thread.Sleep(1000);
             Console.WriteLine("This is a project about syncronization between a source file and a replica");
-            Thread.Sleep(1000);
+
             logPath = InputHandling.GetExistingFPath(args[3]);
-            filePath = InputHandling.GetExistingFPath(args[1]);
+            folderPath = InputHandling.GetExistingFPath(args[1]);
             syncInterval = InputHandling.GetSyncInterval(args[2]);
+
+            Console.WriteLine("If you wish to stop executing write \"exit\" to Exit.");
+            
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Test_task
                 Console.WriteLine("Hello There! It seems you gave me a null string which I REALLY shouldn't use. Could you give me another one?");
                 lineRead = Console.ReadLine();
             }
-            return ((string?)lineRead);
+            return (lineRead);
         }
 
         internal static string GetExistingFPath(string? path)
@@ -62,10 +62,8 @@ namespace Test_task
                 else
                     throw new Exception("A problem ocurred while parsing Sync Times");
             }
-            catch (Exception e)
-            {
-                
-            }
+            catch (Exception e) { ErrorHandling.LogError(e); }
+            Environment.Exit(0);
             return (-1);
         }
     }
