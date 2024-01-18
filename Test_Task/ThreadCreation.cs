@@ -9,13 +9,17 @@ namespace Test_task
 {
     internal class ThreadCreation
     {
-        private Thread inputThread;
-        private Thread updateThread;
-        public ThreadCreation(string folderPath, string logPath, long syncTime) 
+        private Thread workerThread;
+        public ThreadCreation(DirectoryInfo sourceDir, DirectoryInfo targetDir, Action <DirectoryInfo, DirectoryInfo> UpdateReplicaFolder) 
         {
-            inputThread = new Thread(() => WaitUserInput());
-            updateThread = new Thread(() => UpdateReplicaFolder(folderPath, logPath, syncTime));
+            workerThread = new Thread(() => UpdateReplicaFolder(sourceDir, targetDir));
         }
+
+        public ThreadCreation()
+        {
+            workerThread = new Thread(() => WaitUserInput());
+        }
+
         private void WaitUserInput()
         {
             string? rawInput;
@@ -36,16 +40,9 @@ namespace Test_task
                     }
             }
         }
-        public void StartThreads()
+        public void StartThread()
         {
-            inputThread.Start();
-            updateThread.Start();   
+            workerThread.Start();
         }
-
-        private void UpdateReplicaFolder(string folderPath, string logPath, long syncTime)
-        {
-            
-        }
-
     }
 }

@@ -30,12 +30,16 @@ namespace Test_task
             {
                 dir = new DirectoryInfo(verifiedPath);
                 Console.WriteLine(dir.Exists);
-                while (!File.Exists(verifiedPath))
+                while (!Directory.Exists(verifiedPath))
                 {
-                    Console.WriteLine("this isnt a viable folder path. Do you want to create a new folder?");
+                    
+                    Console.WriteLine($"{verifiedPath} isnt a viable folder path. Do you want to create a new folder? Y/N Default:No");
+                    Console.WriteLine("Or input \"exit\" to Exit");
                     createNow = Console.ReadLine();
                     if (createNow != null)
                     {
+                        if (createNow.ToLower() == "exit")
+                            Environment.Exit(0);
                         if (createNow == "Y".ToLower())
                         {
                              dir = Directory.CreateDirectory(verifiedPath);

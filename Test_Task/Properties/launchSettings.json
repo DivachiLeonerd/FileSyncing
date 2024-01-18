@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Test_task": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\Afonso Fernandes\\OneDrive\\Documentos\\Programação\\C#\\exercicios\\Test_Task\\Test_task\\Source\\\" \"C:\\Users\\Afonso Fernandes\\OneDrive\\Documentos\\Programação\\C#\\exercicios\\Test_Task\\Test_task\\Target\\\" 1000  \"C:\\Users\\Afonso Fernandes\\OneDrive\\Documentos\\Programação\\C#\\exercicios\\Test_Task\\Test_task\\Log\\\""
+    }
+  }
+}
