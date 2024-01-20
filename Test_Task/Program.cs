@@ -19,10 +19,6 @@ namespace Test_task
             Console.WriteLine("Welcome to my Test task!");
             //Thread.Sleep(1000);
             Console.WriteLine("This is a project about syncronization between a source folder and a replica");
-            foreach (string arg in args)
-            {
-                Console.WriteLine(arg);
-            }
             if (args.Length != 4) {
                 Console.WriteLine(args.Length);
                 Console.WriteLine("Not enough arguments! Try the following syntax:" +
@@ -31,10 +27,10 @@ namespace Test_task
                 Console.ReadLine();
                 return ;
             }
-            logPath = InputHandling.GetExistingFPath(args[3]);
             folderPath = InputHandling.GetExistingFPath(args[0]);
             targetPath = InputHandling.GetExistingFPath(args[1]);
             syncInterval = InputHandling.GetSyncInterval(args[2]);
+            logPath = InputHandling.GetExistingFPath(args[3]);
 
             Console.WriteLine("If you wish to stop executing write \"exit\" to Exit.");
             sourceDir = new DirectoryInfo(folderPath);
@@ -56,13 +52,59 @@ namespace Test_task
             {
                 if (replica.Exists)
                 {
-                    // Delete Replica
+                    replica.Delete(true);
+                    ErrorHandling.LogError("Deleted Replica");
                 }
                 return ;
             }
+            if (!replica.Exists)
+            {
+                DirCopy(source, replica);
+            }
+            else if (File.Equals(replica.EnumerateFiles(), source.EnumerateFiles()))
+                return;
+            else
+            {
+                
+            }
+
+
             return;
         }
 
+        static bool NeedsUpdate(DirectoryInfo sourceDir, DirectoryInfo targetDir)
+        {
+            return (Directory.Equals(sourceDir.EnumerateFiles(), targetDir.EnumerateFiles())) ;
+        }
+
+        static void UpdateFiles(IEnumerable<FileInfo> sourceDir, IEnumerable<FileInfo> targetDir)
+        {
+            int i = 0;
+            int smallerCount;
+            if (sourceDir.Count() <= targetDir.Count())
+                smallerCount = sourceDir.Count();
+            else
+                smallerCount = targetDir.Count();
+            while (i < smallerCount)
+            {
+
+            }
+        }
+
+        static void UpdateDirectories(string sourceDir, string targetDir)
+        {
+            DirectoryInfo source = new DirectoryInfo(sourceDir);
+            DirectoryInfo target = new DirectoryInfo(targetDir);
+            var sourceFiles = source.EnumerateFiles();
+            var targetFiles = target.EnumerateFiles();
+
+            UpdateFiles(sourceFiles, targetFiles);
+            foreach (var currentDirectory in source.EnumerateDirectories())
+            {
+                Console.WriteLine(currentDirectory.FullName);
+                UpdateDirectories(currentDirectory.FullName, targetDir + currentDirectory.Name);
+            }
+        }
         static void StartThreadWork(long syncInterval, DirectoryInfo sourceDir, DirectoryInfo targetDir)
         {
             long lastUpdate = DateTime.Now.Ticks;
@@ -79,6 +121,12 @@ namespace Test_task
                     updateThread.StartThread();
                 }
             }
+        }
+
+        static void DirCopy(DirectoryInfo source, DirectoryInfo target)
+        {
+            Directory.CreateDirectory(target.FullName);
+
         }
     }
 }

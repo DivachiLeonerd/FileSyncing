@@ -25,12 +25,10 @@ namespace Test_task
             string  verifiedPath = GetNonNullInput(path);
             string  ?createNow;
             DirectoryInfo dir;
-
             try
             {
-                dir = new DirectoryInfo(verifiedPath);
-                Console.WriteLine(dir.Exists);
-                while (!Directory.Exists(verifiedPath))
+                dir = new DirectoryInfo(verifiedPath.Trim());
+                while (!Directory.Exists(dir.FullName))
                 {
                     
                     Console.WriteLine($"{verifiedPath} isnt a viable folder path. Do you want to create a new folder? Y/N Default:No");
@@ -42,16 +40,16 @@ namespace Test_task
                             Environment.Exit(0);
                         if (createNow == "Y".ToLower())
                         {
-                             dir = Directory.CreateDirectory(verifiedPath);
+                            dir = Directory.CreateDirectory(verifiedPath);
                             break ;
                         }
                     }
-                    Console.WriteLine("Existing Folder name:");
+                    Console.WriteLine("Specify Existing Folder name:");
                     verifiedPath = GetNonNullInput(Console.ReadLine());
                 }
                 return (dir.FullName);
             }
-            catch (Exception e) { ErrorHandling.LogError(e); }
+            catch (Exception e) { ErrorHandling.LogError(e.Message); }
             return (GetExistingFPath(verifiedPath));
         }
 
@@ -66,7 +64,7 @@ namespace Test_task
                 else
                     throw new Exception("A problem ocurred while parsing Sync Times");
             }
-            catch (Exception e) { ErrorHandling.LogError(e); }
+            catch (Exception e) { ErrorHandling.LogError(e.Message); }
             Environment.Exit(0);
             return (-1);
         }
