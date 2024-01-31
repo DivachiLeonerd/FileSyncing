@@ -11,10 +11,7 @@ namespace Test_task
         {
             string folderPath;
             int syncInterval;
-            string logPath;
             string targetPath;
-            DirectoryInfo sourceDir;
-            DirectoryInfo targetDir;
 
             Console.WriteLine("Welcome to my Test task!");
             //Thread.Sleep(1000);
@@ -30,103 +27,121 @@ namespace Test_task
             folderPath = InputHandling.GetExistingFPath(args[0]);
             targetPath = InputHandling.GetExistingFPath(args[1]);
             syncInterval = InputHandling.GetSyncInterval(args[2]);
-            logPath = InputHandling.GetExistingFPath(args[3]);
+            ErrorHandling.LogPath = args[3].Trim();
 
-            Console.WriteLine("If you wish to stop executing write \"exit\" to Exit.");
-            sourceDir = new DirectoryInfo(folderPath);
-            targetDir = new DirectoryInfo(targetPath);
-
-           //if ReplicaPath is invalid OR empty then just copy Source
             
-           //Update Replica and keep Source and Replica content and access data (new files/ file renames, file edit timestamps, ...)
-           //If neither replica nor source have changes then nothing needs updating
+            Console.WriteLine("If you wish to stop executing write \"exit\" to Exit.");
+            ErrorHandling.CleanLog();
+            UpdateReplicaFolder(syncInterval, folderPath, targetPath);
+            //if ReplicaPath is invalid OR empty then just copy Source
+
+            //Update Replica and keep Source and Replica content and access data (new files/ file renames, file edit timestamps, ...)
+            //If neither replica nor source have changes then nothing needs updating
 
             //if, for example, a file was accessed and it's timestamp is different, then we need to update
+            Thread.CurrentThread.Join();
             return ;
         }
 
-        static void UpdateReplicaFolder(DirectoryInfo source, DirectoryInfo replica)
+        static void UpdateReplicaFolder(long syncInterval, string source, string replica)
         {
-            Console.WriteLine("Updating replica folder");
-            if (!source.Exists)
-            {
-                if (replica.Exists)
-                {
-                    replica.Delete(true);
-                    ErrorHandling.LogError("Deleted Replica");
-                }
-                return ;
-            }
-            if (!replica.Exists)
-            {
-                DirCopy(source, replica);
-            }
-            else if (File.Equals(replica.EnumerateFiles(), source.EnumerateFiles()))
-                return;
-            else
-            {
-                
-            }
-
-
-            return;
-        }
-
-        static bool NeedsUpdate(DirectoryInfo sourceDir, DirectoryInfo targetDir)
-        {
-            return (Directory.Equals(sourceDir.EnumerateFiles(), targetDir.EnumerateFiles())) ;
-        }
-
-        static void UpdateFiles(IEnumerable<FileInfo> sourceDir, IEnumerable<FileInfo> targetDir)
-        {
-            int i = 0;
-            int smallerCount;
-            if (sourceDir.Count() <= targetDir.Count())
-                smallerCount = sourceDir.Count();
-            else
-                smallerCount = targetDir.Count();
-            while (i < smallerCount)
-            {
-
-            }
-        }
-
-        static void UpdateDirectories(string sourceDir, string targetDir)
-        {
-            DirectoryInfo source = new DirectoryInfo(sourceDir);
-            DirectoryInfo target = new DirectoryInfo(targetDir);
-            var sourceFiles = source.EnumerateFiles();
-            var targetFiles = target.EnumerateFiles();
-
-            UpdateFiles(sourceFiles, targetFiles);
-            foreach (var currentDirectory in source.EnumerateDirectories())
-            {
-                Console.WriteLine(currentDirectory.FullName);
-                UpdateDirectories(currentDirectory.FullName, targetDir + currentDirectory.Name);
-            }
-        }
-        static void StartThreadWork(long syncInterval, DirectoryInfo sourceDir, DirectoryInfo targetDir)
-        {
-            long lastUpdate = DateTime.Now.Ticks;
             ThreadCreation updateThread;
             ThreadCreation userInputThread;
 
+            updateThread = new ThreadCreation(syncInterval, source, replica, UpdateDirectories);
             userInputThread = new ThreadCreation();
-            updateThread = new ThreadCreation(sourceDir, targetDir, UpdateReplicaFolder);
-            while (true)
+
+            userInputThread.StartThread();
+            updateThread.StartThread();
+
+            updateThread.waitForThread();
+            userInputThread.waitForThread();
+            return ;
+        }
+        static void UpdateDirectories(long syncInterval, string sourceDir, string targetDir)
+        {
+            long lastUpdate = DateTime.Now.Ticks;
+            DirectoryInfo source = new DirectoryInfo(sourceDir);
+            DirectoryInfo target = new DirectoryInfo(targetDir);
+            try
             {
-                userInputThread.StartThread();
-                while(DateTime.Now.Ticks - lastUpdate > syncInterval)
+                while (true)
                 {
-                    updateThread.StartThread();
+                    if (DateTime.Now.Ticks - lastUpdate > syncInterval)
+                    {
+                        Console.WriteLine("Time to update!");
+                        UpdateFiles(source, target);
+                        foreach (var currentDirectory in source.EnumerateDirectories())
+                        {
+                            Console.WriteLine(currentDirectory.FullName);
+                            UpdateDirectories(syncInterval, currentDirectory.FullName, targetDir + currentDirectory.Name);
+                        }
+                        lastUpdate = DateTime.Now.Ticks;
+                    }
+                    
                 }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("An error has occured: " + e.Message);
             }
         }
 
-        static void DirCopy(DirectoryInfo source, DirectoryInfo target)
+        static void UpdateFiles(DirectoryInfo sourceDir, DirectoryInfo targetDir)
         {
-            Directory.CreateDirectory(target.FullName);
+            var sourceFiles = sourceDir.EnumerateFiles();
+            var targetFiles = targetDir.EnumerateFiles();
+            bool targetIsBigger = false;
 
+            int i = 0;
+            int smallerCount;
+            Console.WriteLine("Just entered in UpdateFiles");
+            if (sourceFiles.Count() <= targetFiles.Count())
+            {
+                smallerCount = sourceFiles.Count();
+                targetIsBigger = true;
+            }
+            else
+                smallerCount = targetFiles.Count();
+            while (i < smallerCount)
+            {
+                if (!sourceFiles.ElementAt(i).Equals(targetFiles.ElementAt(i)))
+                    FileCopy(sourceFiles.ElementAt(i), targetDir);
+                i++;
+            }
+            if (targetIsBigger)
+            {
+                while (i < targetFiles.Count())
+                {
+                    targetFiles.ElementAt(i).Delete();
+                    i++;
+                }
+            }
+            else
+            {
+                while (i < sourceFiles.Count())
+                {
+                    sourceFiles.ElementAt(i).CopyTo(targetDir.FullName + sourceFiles.ElementAt(i).Name, true);
+                    i++;
+                }
+            }
+            return ;
+        }
+
+        static void FileCopy(FileInfo sourceFile, DirectoryInfo targetDir)
+        {
+            sourceFile.CopyTo(targetDir.FullName + sourceFile.Name, true);
+            ErrorHandling.LogError($"Copying {sourceFile} to {targetDir.Name}");
+        }
+        static void DirCopy(DirectoryInfo sourceSubFolder, DirectoryInfo target)
+        {
+            string newTargetName;
+            DirectoryInfo targetSubFolder;
+
+            newTargetName = target.FullName + sourceSubFolder.Name;
+            targetSubFolder = Directory.CreateDirectory(newTargetName);
+            UpdateFiles(sourceSubFolder, targetSubFolder);
         }
     }
 }

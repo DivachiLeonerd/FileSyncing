@@ -14,12 +14,13 @@ namespace Test_task
         public static void LogError(string errorMessage)
         {
             Console.WriteLine(errorMessage);
-            File.AppendAllText("MyLog", errorMessage);
+            File.AppendAllText("MyLog", errorMessage + "\n\n");
+            
         }
         public static void CleanLog()
         {
             Console.WriteLine("Cleaning the file...");
-            System.IO.File.WriteAllText(ErrorHandling.LogPath, string.Empty);
+            System.IO.File.WriteAllText(LogPath, string.Empty);
         }
 
         public static string LogPath

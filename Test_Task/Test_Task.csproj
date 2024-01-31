@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="MyLog\" />
     <Folder Include="Target\" />
     <Folder Include="Source\" />
   </ItemGroup>

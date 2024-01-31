@@ -6,8 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_task", "Test_task\Test_task.csproj", "{D25073FD-21B7-4C21-8AF6-5BD56E9E3B1A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C716871D-C96E-452F-B0E6-CD906CC3A430}"
+	ProjectSection(SolutionItems) = preProject
+		Test_task\ErrorHandling.cs = Test_task\ErrorHandling.cs
+		Test_task\InputHandling.cs = Test_task\InputHandling.cs
+		Test_task\TextFileClass.cs = Test_task\TextFileClass.cs
+		Test_task\ThreadCreation.cs = Test_task\ThreadCreation.cs
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing_FileInfo", "Testing_FileInfo\Testing_FileInfo.csproj", "{FB48F818-71AD-499D-BDFC-ECD721974EA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testing_FileInfo", "Testing_FileInfo\Testing_FileInfo.csproj", "{FB48F818-71AD-499D-BDFC-ECD721974EA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
