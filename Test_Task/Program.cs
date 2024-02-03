@@ -2,6 +2,7 @@
 using System.IO;
 using System.Diagnostics.Contracts;
 using System.Reflection.Metadata.Ecma335;
+using System.Collections.Immutable;
 
 namespace Test_task
 {
@@ -48,7 +49,7 @@ namespace Test_task
             ThreadCreation updateThread;
             ThreadCreation userInputThread;
 
-            updateThread = new ThreadCreation(syncInterval, source, replica, UpdateDirectories);
+            updateThread = new ThreadCreation(syncInterval, source, replica, Update);
             userInputThread = new ThreadCreation();
 
             userInputThread.StartThread();
@@ -58,90 +59,53 @@ namespace Test_task
             userInputThread.waitForThread();
             return ;
         }
+
+        static void Update(long syncInterval, string sourceDir, string targetDir)
+        {
+            long lastUpdateTime = DateTime.Now.Ticks;
+
+            while (true)
+            {
+                if (DateTime.Now.Ticks - lastUpdateTime > syncInterval)
+                {
+                    try
+                    {
+                        UpdateDirectories(syncInterval, sourceDir, targetDir);
+                        lastUpdateTime = DateTime.Now.Ticks;
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorHandling.LogMessage(ex);
+                        Update(syncInterval, sourceDir, targetDir);
+                    }
+                }
+            }
+        }
+
         static void UpdateDirectories(long syncInterval, string sourceDir, string targetDir)
         {
-            long lastUpdate = DateTime.Now.Ticks;
+
             DirectoryInfo source = new DirectoryInfo(sourceDir);
             DirectoryInfo target = new DirectoryInfo(targetDir);
-            try
+            IEnumerable<DirectoryInfo> sourceDirectories = source.EnumerateDirectories();
+            UpdateFiles(source, target);
+            foreach (var subFolder in sourceDirectories)
             {
-                while (true)
-                {
-                    if (DateTime.Now.Ticks - lastUpdate > syncInterval)
-                    {
-                        Console.WriteLine("Time to update!");
-                        UpdateFiles(source, target);
-                        foreach (var currentDirectory in source.EnumerateDirectories())
-                        {
-                            Console.WriteLine(currentDirectory.FullName);
-                            UpdateDirectories(syncInterval, currentDirectory.FullName, targetDir + currentDirectory.Name);
-                        }
-                        lastUpdate = DateTime.Now.Ticks;
-                    }
-                    
-                }
-
+                Console.WriteLine(subFolder.FullName);
+                UpdateDirectories(syncInterval, subFolder.FullName, targetDir + '\\' + subFolder.Name);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine("An error has occured: " + e.Message);
-            }
+            Directory.SetLastWriteTime(target.FullName, source.LastWriteTime);
         }
 
         static void UpdateFiles(DirectoryInfo sourceDir, DirectoryInfo targetDir)
         {
-            var sourceFiles = sourceDir.EnumerateFiles();
-            var targetFiles = targetDir.EnumerateFiles();
-            bool targetIsBigger = false;
-
-            int i = 0;
-            int smallerCount;
-            Console.WriteLine("Just entered in UpdateFiles");
-            if (sourceFiles.Count() <= targetFiles.Count())
-            {
-                smallerCount = sourceFiles.Count();
-                targetIsBigger = true;
-            }
-            else
-                smallerCount = targetFiles.Count();
-            while (i < smallerCount)
-            {
-                if (!sourceFiles.ElementAt(i).Equals(targetFiles.ElementAt(i)))
-                    FileCopy(sourceFiles.ElementAt(i), targetDir);
-                i++;
-            }
-            if (targetIsBigger)
-            {
-                while (i < targetFiles.Count())
-                {
-                    targetFiles.ElementAt(i).Delete();
-                    i++;
-                }
-            }
-            else
-            {
-                while (i < sourceFiles.Count())
-                {
-                    sourceFiles.ElementAt(i).CopyTo(targetDir.FullName + sourceFiles.ElementAt(i).Name, true);
-                    i++;
-                }
-            }
-            return ;
+            TextFile.DeleteDifferingFiles(ref sourceDir, ref targetDir);
+            TextFile.DeleteDifferingDirectories(sourceDir.EnumerateDirectories().ToImmutableArray(), targetDir.EnumerateDirectories());
+            TextFile.CreateDifferingDirectories(ref sourceDir, ref targetDir);
+            TextFile.CreatingDifferingFiles(sourceDir, targetDir);
+            return;
         }
 
-        static void FileCopy(FileInfo sourceFile, DirectoryInfo targetDir)
-        {
-            sourceFile.CopyTo(targetDir.FullName + sourceFile.Name, true);
-            ErrorHandling.LogError($"Copying {sourceFile} to {targetDir.Name}");
-        }
-        static void DirCopy(DirectoryInfo sourceSubFolder, DirectoryInfo target)
-        {
-            string newTargetName;
-            DirectoryInfo targetSubFolder;
 
-            newTargetName = target.FullName + sourceSubFolder.Name;
-            targetSubFolder = Directory.CreateDirectory(newTargetName);
-            UpdateFiles(sourceSubFolder, targetSubFolder);
-        }
     }
 }

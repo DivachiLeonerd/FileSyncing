@@ -31,7 +31,7 @@ namespace Test_task
                 while (rawInput == null)
                 {
                     rawInput = Console.ReadLine();
-                    Console.WriteLine("Bitch ass");
+                    Console.WriteLine("Exiting...");
                 }
                 if (rawInput != null)
                 {

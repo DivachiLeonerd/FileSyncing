@@ -49,7 +49,7 @@ namespace Test_task
                 }
                 return (dir.FullName);
             }
-            catch (Exception e) { ErrorHandling.LogError(e.Message); }
+            catch (Exception e) { ErrorHandling.LogMessage(e); }
             return (GetExistingFPath(verifiedPath));
         }
 
@@ -64,7 +64,7 @@ namespace Test_task
                 else
                     throw new Exception("A problem ocurred while parsing Sync Times");
             }
-            catch (Exception e) { ErrorHandling.LogError(e.Message); }
+            catch (Exception e) { ErrorHandling.LogMessage(e); }
             Environment.Exit(0);
             return (-1);
         }

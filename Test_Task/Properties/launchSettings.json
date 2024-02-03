@@ -2,7 +2,7 @@
   "profiles": {
     "Test_task": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\Afonso Fernandes\\OneDrive\\Documentos\\Programação\\C#\\exercicios\\Test_Task\\Test_task\\Source\"\r\n\"C:\\Users\\Afonso Fernandes\\OneDrive\\Documentos\\Programação\\C#\\exercicios\\Test_Task\\Test_task\\Target\"\r\n100000000\r\n\"C:\\Users\\Afonso Fernandes\\OneDrive\\Documentos\\Programação\\C#\\exercicios\\Test_Task\\Test_task\\MyLog\""
+      "commandLineArgs": "\"C:\\Users\\Afonso Fernandes\\OneDrive\\Documentos\\Programação\\C#\\exercicios\\Test_Task\\Test_task\\Source\"\r\n\"C:\\Users\\Afonso Fernandes\\OneDrive\\Documentos\\Programação\\C#\\exercicios\\Test_Task\\Test_task\\Target\"\r\n10000000\r\n\"C:\\Users\\Afonso Fernandes\\OneDrive\\Documentos\\Programação\\C#\\exercicios\\Test_Task\\Test_task\\MyLog\""
     }
   }
 }

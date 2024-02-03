@@ -12,7 +12,6 @@ namespace Test_task
 
         public static bool DirectoriesAreEqual(DirectoryInfo directory1, DirectoryInfo directory2)
         {
-            Console.WriteLine(directory1.FullName + ' ' + directory2.FullName);
             if (directory1.LastWriteTime != directory2.LastWriteTime)
                 return false;
             if (GetDirectoryFileSize(directory1) != GetDirectoryFileSize(directory2))
@@ -46,7 +45,7 @@ namespace Test_task
             {
                 if (!TextFile.CompareFilesContent(sourceFiles.ElementAt(i), targetFiles.ElementAt(i)))
                 {
-                    ErrorHandling.LogError($"Copying... {targetFiles.ElementAt(i).FullName}");
+                    ErrorHandling.LogMessage(2, targetFiles.ElementAt(i).FullName);
                     FileCopy(sourceFiles.ElementAt(i), targetDir);
                 }
                 else if (sourceFiles.ElementAt(i).Name != targetFiles.ElementAt(i).Name)
@@ -58,8 +57,8 @@ namespace Test_task
             }
             while (i < sourceFiles.Count())
             {
-                Console.WriteLine(targetDir.FullName + "\\" + sourceFiles.ElementAt(i).Name);
-                sourceFiles.ElementAt(i).CopyTo(targetDir.FullName + "\\" + sourceFiles.ElementAt(i).Name, true);
+                ErrorHandling.LogMessage(2, sourceFiles.ElementAt(i).FullName);
+                FileCopy(sourceFiles.ElementAt(i), targetDir);
                 i++;
             }
         }
@@ -77,6 +76,7 @@ namespace Test_task
             {
                 if (!TextFile.CompareFilesContent(sourceFiles.ElementAt(i), targetFiles.ElementAt(i)))
                 {
+                    ErrorHandling.LogMessage(1, targetFiles.ElementAt(i).FullName);
                     targetFiles.ElementAt(i).Delete();
                 }
                 i++;
@@ -85,6 +85,7 @@ namespace Test_task
             {
                 while (i < targetFiles.Count())
                 {
+                    ErrorHandling.LogMessage(1, targetFiles.ElementAt(i).FullName);
                     targetFiles.ElementAt(i).Delete();
                     i++;
                 }
@@ -143,13 +144,13 @@ namespace Test_task
                 {
                     if (TextFile.DirectoriesAreEqual(sourceDirectories.ElementAt(i), targetDirectories.ElementAt(i)))
                     {
-                        ErrorHandling.LogError($"Copying {sourceDirectories.ElementAt(i).FullName} to {target.FullName + '\\' + sourceDirectories.ElementAt(i).Name}");
+                        ErrorHandling.LogMessage(2, sourceDirectories.ElementAt(i).FullName);
                         Directory.Move(targetDirectories.ElementAt(i).FullName, target.FullName + '\\' + sourceDirectories.ElementAt(i).Name + "temp");
                         Directory.Move(target.FullName + '\\' + sourceDirectories.ElementAt(i).Name + "temp", target.FullName + '\\' +sourceDirectories.ElementAt(i).Name);
                     }
                     else
                     {
-                        ErrorHandling.LogError($"Adding {sourceDirectories.ElementAt(i).FullName} to {target.FullName + '\\' + sourceDirectories.ElementAt(i).Name}");
+                        ErrorHandling.LogMessage(0, sourceDirectories.ElementAt(i).FullName);
                         Directory.CreateDirectory(target.FullName + '\\' + sourceDirectories.ElementAt(i).Name);
                     }
                 }
@@ -160,6 +161,7 @@ namespace Test_task
                 sourceDirectoryCount = sourceDirectories.Count();
                 while (i < sourceDirectoryCount)
                 {
+                    ErrorHandling.LogMessage(0, sourceDirectories.ElementAt(i).FullName);
                     Directory.SetLastWriteTime(Directory.CreateDirectory(target.FullName + '\\' + sourceDirectories.ElementAt(i).Name).FullName, sourceDirectories.ElementAt(i).LastWriteTime);
                     i++;
                 }
@@ -170,15 +172,18 @@ namespace Test_task
         {
             foreach (var file in dirInfo.EnumerateFiles())
             {
+                ErrorHandling.LogMessage(1, file.FullName);
                 file.Delete();
             }
-            Console.WriteLine(dirInfo.FullName);
             foreach (var subfolder in dirInfo.EnumerateDirectories())
             {
                 if (recursive)
                     DeleteDirectory(subfolder, recursive);
                 else
-                    try { subfolder.Delete(); } catch (Exception e) { ErrorHandling.LogError(e.Message); }
+                {
+                    ErrorHandling.LogMessage(1, subfolder.FullName);
+                    subfolder.Delete();
+                }
             }
             dirInfo.Delete();
         }
@@ -197,7 +202,7 @@ namespace Test_task
                 {
                     while (i < smallerCount)
                     {
-                        Console.WriteLine(targetDirectories.ElementAt(i));
+                        ErrorHandling.LogMessage(1, targetDirectories.ElementAt(i).FullName);
                         DeleteDirectory(targetDirectories.ElementAt(i), true);
                         smallerCount--;
                     }
@@ -209,8 +214,9 @@ namespace Test_task
             aux = targetDirectories.Count();
             while (i < aux)
             {
-                Console.WriteLine(targetDirectories.ElementAt(i).FullName);
+                ErrorHandling.LogMessage(1, targetDirectories.ElementAt(i).FullName);
                 DeleteDirectory(targetDirectories.ElementAt(i), true);
+                aux--;
             }
         }
 
@@ -270,12 +276,9 @@ namespace Test_task
 
         static void FileCopy(FileInfo sourceFile, DirectoryInfo targetDir)
         {
+            ErrorHandling.LogMessage(2, sourceFile.FullName);
             FileInfo newFile = sourceFile.CopyTo(targetDir.FullName + '\\' + sourceFile.Name, true);
             newFile.LastWriteTime = sourceFile.LastWriteTime;
-            ErrorHandling.LogError($"Copying {sourceFile} to {targetDir.Name}");
         }
-
-
-
     }
 }

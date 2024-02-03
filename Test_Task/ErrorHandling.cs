@@ -11,15 +11,37 @@ namespace Test_task
         //Log itself using Console and log file
         private static string logPath;
         public static FileInfo log;
-        public static void LogError(string errorMessage)
+        public static void LogMessage(int messageType, string filename)
         {
-            Console.WriteLine(errorMessage);
-            File.AppendAllText("MyLog", errorMessage);
+            switch (messageType)
+            {
+                case 0: Console.WriteLine($"Creating '{filename}' in target repo");
+                        File.AppendAllText(logPath, $"Creating {filename}"); break;
+
+                case 1: Console.WriteLine($"Deleting '{filename}' in target repo");
+                        File.AppendAllText(logPath, $"Deleting {filename}"); break;
+
+                case 2: Console.WriteLine($"Copying '{filename}'  in target repo");
+                        File.AppendAllText(logPath, $"Copying '{filename}'"); break;
+
+                default: Console.WriteLine(logPath, "This is not a valid messageType");break;
+            }
+            Console.WriteLine('\\');
+            File.AppendAllText(logPath, "\n\n");
         }
+
+        public static void LogMessage(Exception ex)
+        {
+            Console.WriteLine($"[ERROR]: {ex.StackTrace}\n\t---> {ex.Message}");
+            File.AppendAllText(logPath, $"[ERROR]: {ex.StackTrace}\n\t---> {ex.Message}");
+            Console.WriteLine('\\');
+            File.AppendAllText(logPath, "\n\n");
+        }
+
         public static void CleanLog()
         {
-            Console.WriteLine("Cleaning the file...");
-            System.IO.File.WriteAllText(ErrorHandling.LogPath, string.Empty);
+            Console.WriteLine("Cleaning the log for new run cycle...");
+            File.WriteAllText(LogPath, string.Empty);
         }
 
         public static string LogPath
@@ -32,7 +54,7 @@ namespace Test_task
                     log = new FileInfo(value);
                     logPath = value;
                 }
-                catch (Exception e){ Console.WriteLine(e.Message); }
+                catch (Exception ex){ Console.WriteLine(ex.Message); throw; }
             }
         }
     }
