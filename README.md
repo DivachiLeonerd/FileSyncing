@@ -6,8 +6,8 @@ WARNING: ANY KIND OF FILES MOVED TO 'TARGET' CAN BE SUBJECT TO PERMANENT DELETIO
 - Copy the repo and open it with Visual Studio
 - Go into
 
-        Project -> Project Settings -> Debug
-  and click the first hyperlink to where you can input the command-line arguments.
+        Project -> Project Properties -> Debug -> Open debug launch profiles UI
+  where you can input the command-line arguments.
 - Input arguments in the following fashion: [SOURCE] [PATH] [SYNCINTERVAL] [LOG]
 - 'Source' is the source folder. The "main" folder you want to be copied over to 'Target'.
 - 'Target' is the folder which will suffer the updates.
